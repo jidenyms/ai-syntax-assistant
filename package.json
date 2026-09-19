@@ -8,8 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^4.0.87",
+    "ai": "^7.0.107",
     "next": "15.5.25",
-    "openai": "^5.19.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

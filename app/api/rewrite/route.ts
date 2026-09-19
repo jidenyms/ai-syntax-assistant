@@ -1,4 +1,5 @@
-import OpenAI from "openai";
+import { generateText } from "ai";
+import { gateway } from "@ai-sdk/gateway";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -22,19 +23,14 @@ export async function POST(request: Request) {
     if (text.length > 12000) {
       return NextResponse.json({ error: "Please keep documents under 12,000 characters." }, { status: 400 });
     }
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: "The OpenAI API key has not been configured yet." }, { status: 503 });
-    }
-
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const response = await openai.responses.create({
-      model: process.env.OPENAI_MODEL || "gpt-5-mini",
-      instructions:
+    const response = await generateText({
+      model: gateway(process.env.OPENAI_MODEL || "openai/gpt-5-mini"),
+      system:
         "You are Syntax AI, an expert writing editor. Return only the revised text—no headings, commentary, quotation marks, or markdown fences. Preserve the writer's meaning and language unless the requested action requires a change.",
-      input: `${instructions[action]}\n\nTEXT TO EDIT:\n${text}`,
+      prompt: `${instructions[action]}\n\nTEXT TO EDIT:\n${text}`,
     });
 
-    const output = response.output_text?.trim();
+    const output = response.text?.trim();
     if (!output) throw new Error("The model returned an empty response.");
     return NextResponse.json({ output });
   } catch (error) {
